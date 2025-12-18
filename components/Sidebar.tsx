@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Cpu, Box, History, ChevronDown, ChevronRight, Zap, Eye, Activity, 
@@ -31,14 +32,12 @@ const Sidebar: React.FC<SidebarProps> = ({
   onSelectExample,
   activeProjectId,
   onClose,
-  onShowInfo,
   onOpenProfile,
   onOpenAuth,
   user
 }) => {
   const [isHardwareMenuOpen, setIsHardwareMenuOpen] = useState(false);
   const [isExamplesOpen, setIsExamplesOpen] = useState(false);
-  const [isInfoMenuOpen, setIsInfoMenuOpen] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const groupedComponents = HARDWARE_COMPONENTS.reduce((acc, comp) => {
@@ -98,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-black text-white truncate">{user.displayName || 'Operator'}</p>
-                <p className="text-[8px] text-emerald-500 font-mono uppercase font-black">Open Cloud Profile</p>
+                <p className="text-[8px] text-emerald-500 font-mono uppercase font-black">Cloud Profile</p>
               </div>
               <button onClick={(e) => { e.stopPropagation(); logout(); }} className="p-2 text-slate-700 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all">
                 <LogOut className="w-4 h-4" />
@@ -108,15 +107,11 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button 
               onClick={handleLogin}
               disabled={isLoggingIn}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-emerald-600 text-white rounded-[20px] font-black text-[10px] uppercase tracking-[0.15em] hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-950/20 active:scale-[0.97] group overflow-hidden relative"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-emerald-600 text-white rounded-[20px] font-black text-[10px] uppercase tracking-[0.15em] hover:bg-emerald-500 transition-all shadow-xl active:scale-[0.97] group overflow-hidden relative"
             >
               <div className="absolute inset-0 animate-shine pointer-events-none"></div>
-              {isLoggingIn ? <Zap className="w-4 h-4 animate-spin" /> : (
-                <>
-                  <UserPlus className="w-4 h-4 shrink-0" />
-                  <span>Connect Google</span>
-                </>
-              )}
+              <UserPlus className="w-4 h-4 shrink-0" />
+              <span>Masuk / Daftar</span>
             </button>
           )}
         </div>
@@ -167,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div>
           <div className="px-3 py-2 flex items-center justify-between text-slate-600">
              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-               <History className="w-4 h-4" /> Riwayat Sketsa
+               <History className="w-4 h-4" /> Riwayat Proyek
              </div>
              {user && <Zap className="w-3 h-3 text-emerald-500 animate-pulse" />}
           </div>
@@ -178,22 +173,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <span className="truncate">{proj.name}</span>
               </button>
             ))}
-            {projects.length === 0 && <p className="text-[9px] text-slate-700 italic px-4 py-4">Belum ada proyek lokal/cloud.</p>}
+            {projects.length === 0 && <p className="text-[9px] text-slate-700 italic px-4 py-4 text-center">Belum ada proyek.</p>}
           </div>
         </div>
       </div>
 
       <AdBanner id="ad-sidebar-bottom" />
-
-      <div className="p-5 border-t border-slate-800 bg-slate-900/80">
-        <div className="flex items-center justify-between px-3 py-2 bg-slate-950 rounded-xl border border-slate-800">
-          <div className="flex flex-col">
-            <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">MCU Link</span>
-            <span className="text-[9px] font-bold text-emerald-500">READY</span>
-          </div>
-          <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
-        </div>
-      </div>
     </div>
   );
 };

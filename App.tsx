@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Send, Code, Loader2, MessageSquare, Sparkles, Layout, Menu, ChevronUp, ChevronDown, 
@@ -86,11 +87,9 @@ const App: React.FC = () => {
       const mergedLibs = Array.from(new Set([...(activeProject?.libraries || []), ...result.libraries, ...suggestedLibs]));
 
       if (activeProject) {
-        setProjects(prev => prev.map(p => 
-          p.id === activeProject.id 
-            ? { ...p, code: result.code, wiring: result.wiringInstructions, description: result.explanation, libraries: mergedLibs } 
-            : p
-        ));
+        const updated = { ...activeProject, code: result.code, wiring: result.wiringInstructions, description: result.explanation, libraries: mergedLibs };
+        setProjects(prev => prev.map(p => p.id === activeProject.id ? updated : p));
+        if (user) await syncProjectToCloud(user.uid, updated);
       } else {
         const newProject: ArduinoProject = {
           id: Date.now().toString(),
@@ -105,6 +104,7 @@ const App: React.FC = () => {
         };
         setProjects(prev => [newProject, ...prev]);
         setActiveProjectId(newProject.id);
+        if (user) await syncProjectToCloud(user.uid, newProject);
       }
       if (user) await incrementProjectCount(user.uid);
       setPromptValue('');
@@ -125,9 +125,9 @@ const App: React.FC = () => {
         activeProject.controls,
         activeProject.batteryType || 'USB 5V'
       );
-      setProjects(prev => prev.map(p => 
-        p.id === activeProject.id ? { ...p, wiring: updatedWiring } : p
-      ));
+      const updated = { ...activeProject, wiring: updatedWiring };
+      setProjects(prev => prev.map(p => p.id === activeProject.id ? updated : p));
+      if (user) await syncProjectToCloud(user.uid, updated);
       setSyncSuccess(true);
       setTimeout(() => setSyncSuccess(false), 3000);
     } catch (err) {
@@ -151,13 +151,13 @@ const App: React.FC = () => {
       {syncSuccess && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-emerald-600 text-white px-6 py-2 rounded-full shadow-2xl flex items-center gap-2 animate-bounce">
           <Zap className="w-4 h-4" />
-          <span className="text-[10px] font-black uppercase tracking-widest">Wiring Berhasil Disinkronisasi!</span>
+          <span className="text-[10px] font-black uppercase tracking-widest">Wiring Sinkron!</span>
         </div>
       )}
 
-      <div className={`fixed inset-y-0 left-0 z-[70] w-64 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed inset-y-0 left-0 z-[70] w-64 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300`}>
         <Sidebar 
-          onSelectComponent={(comp) => handleGenerate(`Tambahkan: ${comp.name}`, comp.libraries)} 
+          onSelectComponent={(comp) => handleGenerate(`Tambahkan hardware: ${comp.name}`, comp.libraries)} 
           onSelectExample={(ex) => {
              const newProject = { ...ex, id: Date.now().toString(), createdAt: Date.now() };
              setProjects(prev => [newProject, ...prev]);
@@ -188,7 +188,7 @@ const App: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setIsConnected(!isConnected)} className={`px-4 py-1 rounded-lg text-[9px] font-black border transition-all ${isConnected ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-slate-800 text-slate-500'}`}>
-                    {isConnected ? 'LIVE' : 'SIM'}
+                    {isConnected ? 'LIVE' : 'SIMULASI'}
                   </button>
                 </div>
               </header>
@@ -200,12 +200,12 @@ const App: React.FC = () => {
             </button>
 
             <div className="flex-1 flex flex-col bg-slate-900 border-t border-slate-800 overflow-hidden">
-              <div className="flex px-4 border-b border-slate-800 bg-slate-900 z-10 overflow-x-auto">
+              <div className="flex px-4 border-b border-slate-800 bg-slate-900 z-10 overflow-x-auto no-scrollbar">
                 {['chat', 'code', 'simulation', 'test', 'libraries', 'controls', 'profile'].map(tab => (
                   <button 
                     key={tab}
                     onClick={() => setActiveTab(tab as any)}
-                    className={`py-3 px-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === tab ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-500'}`}
+                    className={`py-3 px-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all whitespace-nowrap ${activeTab === tab ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-500'}`}
                   >
                     {tab}
                   </button>
@@ -216,22 +216,26 @@ const App: React.FC = () => {
                 {activeTab === 'profile' ? (
                   <ProfileView 
                     user={user} projects={projects} 
-                    onDeleteProject={(id) => setProjects(prev => prev.filter(p => p.id !== id))}
+                    onDeleteProject={(id) => {
+                      setProjects(prev => prev.filter(p => p.id !== id));
+                      if (user) deleteProjectFromCloud(user.uid, id);
+                    }}
                     onOpenProject={(id) => { setActiveProjectId(id); setActiveTab('code'); }}
                     onTriggerRewardedAd={(cb) => { setAdRewardCallback(() => cb); setShowInterstitial(true); }}
                   />
                 ) : activeTab === 'chat' ? (
                   <div className="h-full flex flex-col p-4">
-                    <div className="flex-1 flex flex-col items-center justify-center opacity-30">
+                    <div className="flex-1 flex flex-col items-center justify-center opacity-30 text-center">
                       <Sparkles className="w-16 h-16 text-emerald-500 mb-4" />
-                      <p className="text-sm font-bold uppercase tracking-widest">Tulis permintaan Anda di bawah</p>
+                      <p className="text-sm font-black uppercase tracking-widest">Apa yang ingin Anda buat hari ini?</p>
+                      <p className="text-xs mt-2">Contoh: "Buat sensor parkir dengan buzzer dan LED"</p>
                     </div>
                     <div className="mt-4 flex gap-3 p-2 bg-slate-950 rounded-3xl border border-slate-800">
                       <input 
                         type="text" value={promptValue} 
                         onChange={e => setPromptValue(e.target.value)} 
                         onKeyDown={e => e.key === 'Enter' && handleGenerate()}
-                        placeholder="Buat alat penyiram tanaman otomatis..." 
+                        placeholder="Ketik ide proyek Arduino Anda..." 
                         className="flex-1 bg-transparent border-none py-3 px-6 text-sm text-white focus:ring-0 outline-none" 
                       />
                       <button onClick={() => handleGenerate()} disabled={isGenerating} className="px-6 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl transition-all">
@@ -247,6 +251,7 @@ const App: React.FC = () => {
                     fileName={activeProject?.name || 'Arduino'} 
                     isConnected={isConnected}
                     isGenerating={isGenerating}
+                    onAutoFix={(err) => handleGenerate(`Perbaiki error berikut di kode saya: ${err}`)}
                    />
                 ) : activeTab === 'simulation' ? (
                   <VirtualLab project={activeProject!} onFixRequest={(m) => handleGenerate(m)} />

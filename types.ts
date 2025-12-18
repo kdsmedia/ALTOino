@@ -70,7 +70,6 @@ export interface HardwareComponent {
   libraries?: string[];
 }
 
-// Added AIResponse interface to resolve missing export error
 export interface AIResponse {
   code: string;
   explanation: string;
@@ -78,7 +77,6 @@ export interface AIResponse {
   wiringInstructions: string;
 }
 
-// Added ProjectAudit interface to resolve missing export error
 export interface ProjectAudit {
   score: number;
   summary: string;
