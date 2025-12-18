@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { 
   Cpu, Box, History, ChevronDown, ChevronRight, Zap, Eye, Activity, 
   Sliders, Radio, X, Layout, Layers, FolderTree, CircuitBoard, 
   BookOpen, Star, HelpCircle, Shield, Info, FileText, AlertCircle, Send,
-  Sparkles, LogOut, User, Cloud, Lock
+  Sparkles, LogOut, User, Cloud, Lock, UserPlus
 } from 'lucide-react';
 import { HARDWARE_COMPONENTS, EXAMPLE_PROJECTS } from '../constants';
 import { ArduinoProject, ComponentType, HardwareComponent } from '../types';
@@ -13,7 +12,6 @@ import { loginWithGoogle, logout } from '../services/firebaseService';
 import { User as FirebaseUser } from 'firebase/auth';
 
 interface SidebarProps {
-  // Update return type to handle async functions from App.tsx
   onSelectComponent: (comp: HardwareComponent) => void | Promise<void>;
   projects: ArduinoProject[];
   onSelectProject: (id: string) => void;
@@ -22,7 +20,6 @@ interface SidebarProps {
   onClose?: () => void;
   onShowInfo?: (modal: string) => void;
   onOpenProfile?: () => void;
-  // Add missing onOpenAuth prop required by App.tsx
   onOpenAuth?: () => void;
   user: FirebaseUser | null;
 }
@@ -43,10 +40,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isExamplesOpen, setIsExamplesOpen] = useState(false);
   const [isInfoMenuOpen, setIsInfoMenuOpen] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    [ComponentType.BOARD]: true,
-    [ComponentType.SENSOR]: true
-  });
 
   const groupedComponents = HARDWARE_COMPONENTS.reduce((acc, comp) => {
     const key = comp.type;
@@ -55,20 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     return acc;
   }, {} as Record<string, HardwareComponent[]>);
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case ComponentType.BOARD: return <Cpu className="w-3.5 h-3.5" />;
-      case ComponentType.SENSOR: return <Eye className="w-3.5 h-3.5" />;
-      case ComponentType.INTERFACE: return <Layout className="w-3.5 h-3.5" />;
-      case ComponentType.ACTUATOR: return <Activity className="w-3.5 h-3.5" />;
-      case ComponentType.COMMUNICATION: return <Radio className="w-3.5 h-3.5" />;
-      case ComponentType.ACCESSORY: return <Layers className="w-3.5 h-3.5" />;
-      default: return <Box className="w-3.5 h-3.5" />;
-    }
-  };
-
   const handleLogin = async () => {
-    // If onOpenAuth is provided, use it to open the auth modal
     if (onOpenAuth) {
       onOpenAuth();
       return;
@@ -85,7 +65,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className="h-full bg-slate-900 border-r border-slate-800 flex flex-col shadow-2xl overflow-hidden select-none">
-      {/* BRAND & USER SECTION */}
       <div className="p-5 border-b border-slate-800 bg-slate-900/50 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-emerald-400 font-bold text-xl">
@@ -99,7 +78,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* GOOGLE LOGIN / PROFILE BUTTON */}
         <div className="relative group">
           {user ? (
             <div 
@@ -107,13 +85,19 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="flex items-center gap-3 p-2.5 bg-slate-950 border border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-800 hover:border-emerald-500/30 transition-all group"
             >
               <div className="relative">
-                <img src={user.photoURL || ''} className="w-9 h-9 rounded-full border border-emerald-500/30 group-hover:scale-105 transition-transform shadow-lg" alt="profile" />
+                {user.photoURL ? (
+                  <img src={user.photoURL} className="w-9 h-9 rounded-full border border-emerald-500/30 group-hover:scale-105 transition-transform shadow-lg" alt="profile" />
+                ) : (
+                   <div className="w-9 h-9 rounded-full border border-emerald-500/30 bg-emerald-500/20 flex items-center justify-center text-emerald-500 font-black text-xs uppercase">
+                    {user.displayName?.charAt(0) || user.email?.charAt(0)}
+                  </div>
+                )}
                 <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-950 flex items-center justify-center">
                   <Cloud className="w-2 h-2 text-white" />
                 </div>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-black text-white truncate">{user.displayName}</p>
+                <p className="text-[10px] font-black text-white truncate">{user.displayName || 'Operator'}</p>
                 <p className="text-[8px] text-emerald-500 font-mono uppercase font-black">Open Cloud Profile</p>
               </div>
               <button onClick={(e) => { e.stopPropagation(); logout(); }} className="p-2 text-slate-700 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all">
@@ -124,17 +108,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button 
               onClick={handleLogin}
               disabled={isLoggingIn}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white text-slate-900 rounded-[20px] font-black text-[10px] uppercase tracking-[0.15em] hover:bg-emerald-500 hover:text-white transition-all shadow-xl active:scale-[0.97] disabled:opacity-50 group overflow-hidden relative"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-emerald-600 text-white rounded-[20px] font-black text-[10px] uppercase tracking-[0.15em] hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-950/20 active:scale-[0.97] group overflow-hidden relative"
             >
               <div className="absolute inset-0 animate-shine pointer-events-none"></div>
               {isLoggingIn ? <Zap className="w-4 h-4 animate-spin" /> : (
                 <>
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                  </svg>
+                  <UserPlus className="w-4 h-4 shrink-0" />
                   <span>Connect Google</span>
                 </>
               )}
@@ -144,7 +123,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-5 space-y-3 custom-scrollbar">
-        {/* MENU GROUPS */}
         <div className="space-y-1">
           <button onClick={() => setIsExamplesOpen(!isExamplesOpen)} className={`w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all ${isExamplesOpen ? 'bg-amber-500/10 text-amber-300' : 'text-slate-400 hover:bg-slate-800'}`}>
             <div className="flex items-center gap-3">
@@ -186,7 +164,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="h-px bg-slate-800 my-4 opacity-50" />
 
-        {/* SAVED PROJECTS */}
         <div>
           <div className="px-3 py-2 flex items-center justify-between text-slate-600">
              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
@@ -195,7 +172,7 @@ const Sidebar: React.FC<SidebarProps> = ({
              {user && <Zap className="w-3 h-3 text-emerald-500 animate-pulse" />}
           </div>
           <div className="mt-2 space-y-1">
-            {projects.map(proj => (
+            {projects.map((proj: ArduinoProject) => (
               <button key={proj.id} onClick={() => onSelectProject(proj.id)} className={`w-full text-left px-4 py-3 text-[11px] rounded-xl border transition-all truncate flex items-center gap-3 ${activeProjectId === proj.id ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 font-bold' : 'text-slate-400 border-transparent hover:bg-slate-800'}`}>
                 <div className={`w-1.5 h-1.5 rounded-full ${activeProjectId === proj.id ? 'bg-emerald-400 shadow-[0_0_8px_#10b981]' : 'bg-slate-700'}`} />
                 <span className="truncate">{proj.name}</span>

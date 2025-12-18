@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Send, Code, Loader2, MessageSquare, Sparkles, Layout, Menu, ChevronUp, ChevronDown, 
@@ -44,7 +43,6 @@ const App: React.FC = () => {
   const [adRewardCallback, setAdRewardCallback] = useState<(() => void) | null>(null);
 
   const [showSplash, setShowSplash] = useState(true);
-  const [splashProgress, setSplashProgress] = useState(0);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
