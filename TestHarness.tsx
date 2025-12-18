@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Beaker, Play, RotateCcw, ShieldCheck, AlertCircle, 
   CheckCircle2, Terminal, Info, Zap, Activity, Bug,
   ArrowRight, ListChecks, Search
 } from 'lucide-react';
-import { ArduinoProject } from '../types';
+import { ArduinoProject } from './types';
 
 interface TestHarnessProps {
   project: ArduinoProject;
@@ -54,13 +53,11 @@ const TestHarness: React.FC<TestHarnessProps> = ({ project, onAutoFix }) => {
       setActiveTestIndex(i);
       setResults(prev => prev.map((t, idx) => idx === i ? { ...t, status: 'running' } : t));
       
-      // Artificial delay for simulation feel
       await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500));
       
       let status: 'pass' | 'fail' | 'warn' = 'pass';
       let message = 'All checks passed.';
 
-      // Actual Logic Tests
       const testId = initialTests[i].id;
       if (testId === 't1') {
         const pins = controls.map(c => c.pin);
@@ -81,8 +78,7 @@ const TestHarness: React.FC<TestHarnessProps> = ({ project, onAutoFix }) => {
           message = `Only ${pinModes}/${controls.length} hardware pins initialized via pinMode().`;
         }
       } else if (testId === 't4') {
-        // Mock power calculation
-        const peakDraw = controls.length * 20 + 50; // Simple estimate
+        const peakDraw = controls.length * 20 + 50;
         if (project.batteryType?.includes('USB') && peakDraw > 500) {
           status = 'warn';
           message = `Potential power instability (Est. ${peakDraw}mA on USB source).`;
@@ -146,10 +142,8 @@ const TestHarness: React.FC<TestHarnessProps> = ({ project, onAutoFix }) => {
       </div>
 
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Test Checklist */}
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-slate-950">
           <div className="max-w-4xl mx-auto space-y-4">
-            {/* Summary Dashboard */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
               <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
                  <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Checks</div>
@@ -169,7 +163,6 @@ const TestHarness: React.FC<TestHarnessProps> = ({ project, onAutoFix }) => {
               </div>
             </div>
 
-            {/* Detailed Test Items */}
             <div className="space-y-3">
               {results.map((test, i) => (
                 <div 
@@ -222,7 +215,6 @@ const TestHarness: React.FC<TestHarnessProps> = ({ project, onAutoFix }) => {
           </div>
         </div>
 
-        {/* Live Execution Console */}
         <div className="w-full md:w-80 lg:w-96 bg-slate-900 border-l border-slate-800 flex flex-col shrink-0">
           <div className="p-4 border-b border-slate-800 bg-slate-950/30 flex items-center justify-between">
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -240,15 +232,7 @@ const TestHarness: React.FC<TestHarnessProps> = ({ project, onAutoFix }) => {
                  <span className="flex-1 break-words">{log}</span>
                </div>
             ))}
-            {testLog.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center opacity-10 text-slate-500 text-center px-10">
-                <ListChecks className="w-12 h-12 mb-3" />
-                <p className="text-[10px] font-black uppercase tracking-[0.2em]">Console Standby</p>
-                <p className="text-[8px] mt-2">Begin test sequence to view diagnostics</p>
-              </div>
-            )}
           </div>
-          
           <div className="p-6 bg-slate-950 border-t border-slate-800">
              <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
@@ -258,14 +242,6 @@ const TestHarness: React.FC<TestHarnessProps> = ({ project, onAutoFix }) => {
                 <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
                    <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: '84.2%' }}></div>
                 </div>
-                {failCount > 0 && (
-                  <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
-                    <div className="flex items-center gap-2 text-rose-400 text-[10px] font-black uppercase mb-1">
-                      <Bug className="w-3.5 h-3.5" /> Stability Warning
-                    </div>
-                    <p className="text-[9px] text-slate-500 italic">Project contains critical logic errors that may prevent hardware initialization.</p>
-                  </div>
-                )}
              </div>
           </div>
         </div>

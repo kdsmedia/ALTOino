@@ -151,7 +151,7 @@ const Sidebar: React.FC<SidebarProps> = ({
              {user && <Zap className="w-3 h-3 text-emerald-500 animate-pulse" />}
           </div>
           <div className="mt-2 space-y-1">
-            {projects.map(proj => (
+            {projects.map((proj: ArduinoProject) => (
               <button key={proj.id} onClick={() => onSelectProject(proj.id)} className={`w-full text-left px-4 py-3 text-[11px] rounded-xl border transition-all truncate flex items-center gap-3 ${activeProjectId === proj.id ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 font-bold' : 'text-slate-400 border-transparent hover:bg-slate-800'}`}>
                 <div className={`w-1.5 h-1.5 rounded-full ${activeProjectId === proj.id ? 'bg-emerald-400 shadow-[0_0_8px_#10b981]' : 'bg-slate-700'}`} />
                 <span className="truncate">{proj.name}</span>
