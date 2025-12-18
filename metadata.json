@@ -1,0 +1,7 @@
+{
+  "name": "ALTOino Pro - AI Arduino IDE",
+  "description": "High-performance AI IDE for Arduino coding with Earning System, Real-time Simulation, and Cloud Sync.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
