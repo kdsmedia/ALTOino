@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Cpu, Box, History, ChevronDown, ChevronRight, Zap, Eye, Activity, 
@@ -6,10 +5,10 @@ import {
   BookOpen, Star, HelpCircle, Shield, Info, FileText, AlertCircle, Send,
   Sparkles, LogOut, User, Cloud, Lock, UserPlus
 } from 'lucide-react';
-import { HARDWARE_COMPONENTS, EXAMPLE_PROJECTS } from '../constants';
-import { ArduinoProject, ComponentType, HardwareComponent } from '../types';
+import { HARDWARE_COMPONENTS, EXAMPLE_PROJECTS } from './constants';
+import { ArduinoProject, ComponentType, HardwareComponent } from './types';
 import { AdBanner } from './components/AdContainer';
-import { logout } from '../services/firebaseService';
+import { logout } from './services/firebaseService';
 import { User as FirebaseUser } from 'firebase/auth';
 
 interface SidebarProps {
@@ -40,11 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isHardwareMenuOpen, setIsHardwareMenuOpen] = useState(false);
   const [isExamplesOpen, setIsExamplesOpen] = useState(false);
   const [isInfoMenuOpen, setIsInfoMenuOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    [ComponentType.BOARD]: true,
-    [ComponentType.SENSOR]: true
-  });
-
+  
   const groupedComponents = HARDWARE_COMPONENTS.reduce((acc, comp) => {
     const key = comp.type;
     if (!acc[key]) acc[key] = [];
@@ -52,21 +47,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     return acc;
   }, {} as Record<string, HardwareComponent[]>);
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case ComponentType.BOARD: return <Cpu className="w-3.5 h-3.5" />;
-      case ComponentType.SENSOR: return <Eye className="w-3.5 h-3.5" />;
-      case ComponentType.INTERFACE: return <Layout className="w-3.5 h-3.5" />;
-      case ComponentType.ACTUATOR: return <Activity className="w-3.5 h-3.5" />;
-      case ComponentType.COMMUNICATION: return <Radio className="w-3.5 h-3.5" />;
-      case ComponentType.ACCESSORY: return <Layers className="w-3.5 h-3.5" />;
-      default: return <Box className="w-3.5 h-3.5" />;
-    }
-  };
-
   return (
     <div className="h-full bg-slate-900 border-r border-slate-800 flex flex-col shadow-2xl overflow-hidden select-none">
-      {/* BRAND & USER SECTION */}
       <div className="p-5 border-b border-slate-800 bg-slate-900/50 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-emerald-400 font-bold text-xl">
@@ -80,7 +62,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* PROFILE / AUTH BUTTON */}
         <div className="relative group">
           {user ? (
             <div 
@@ -121,7 +102,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-5 space-y-3 custom-scrollbar">
-        {/* MENU GROUPS */}
         <div className="space-y-1">
           <button onClick={() => setIsExamplesOpen(!isExamplesOpen)} className={`w-full flex items-center justify-between px-3 py-3 rounded-xl transition-all ${isExamplesOpen ? 'bg-amber-500/10 text-amber-300' : 'text-slate-400 hover:bg-slate-800'}`}>
             <div className="flex items-center gap-3">
@@ -163,7 +143,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="h-px bg-slate-800 my-4 opacity-50" />
 
-        {/* SAVED PROJECTS */}
         <div>
           <div className="px-3 py-2 flex items-center justify-between text-slate-600">
              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
